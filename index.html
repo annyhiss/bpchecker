@@ -1,762 +1,923 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BP Check — Blood Pressure Analyzer</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #0d0f14;
-      --surface: #13151c;
-      --surface2: #1a1d27;
-      --surface3: #21253300;
-      --border: rgba(255,255,255,0.07);
-      --border-hi: rgba(255,255,255,0.14);
-      --text: #f0eeea;
-      --text-2: #9996a0;
-      --text-3: #5c5a65;
-      --accent: #c8f0d0;
-      --accent-dim: rgba(200,240,208,0.12);
-      --red: #ff6b6b;
-      --red-dim: rgba(255,107,107,0.12);
-      --amber: #ffb347;
-      --amber-dim: rgba(255,179,71,0.12);
-      --blue: #7eb8f7;
-      --blue-dim: rgba(126,184,247,0.12);
-      --green: #6ee7a0;
-      --green-dim: rgba(110,231,160,0.12);
-      --font-display: 'Playfair Display', serif;
-      --font-body: 'Outfit', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: var(--font-body);
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* Background pattern */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 60% 50% at 20% 10%, rgba(110,231,160,0.04) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 40% at 80% 80%, rgba(126,184,247,0.04) 0%, transparent 60%),
-        repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.015) 80px),
-        repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.015) 80px);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .page-wrap {
-      position: relative;
-      z-index: 1;
-      max-width: 560px;
-      margin: 0 auto;
-      padding: 60px 24px 80px;
-    }
-
-    /* ─── Header ─── */
-    .header {
-      text-align: center;
-      margin-bottom: 48px;
-      animation: fadeUp 0.6s ease both;
-    }
-
-    .header-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 56px;
-      height: 56px;
-      border-radius: 16px;
-      background: var(--green-dim);
-      border: 1px solid rgba(110,231,160,0.2);
-      margin-bottom: 20px;
-    }
-
-    .header-icon svg {
-      width: 26px;
-      height: 26px;
-      stroke: var(--green);
-      fill: none;
-      stroke-width: 1.8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .header h1 {
-      font-family: var(--font-display);
-      font-size: 36px;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      line-height: 1.15;
-      margin-bottom: 10px;
-    }
-
-    .header h1 em {
-      font-style: italic;
-      color: var(--green);
-    }
-
-    .header p {
-      font-size: 14px;
-      color: var(--text-2);
-      line-height: 1.6;
-      max-width: 340px;
-      margin: 0 auto;
-    }
-
-    /* ─── Card ─── */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 32px;
-      animation: fadeUp 0.6s 0.1s ease both;
-    }
-
-    .section-label {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-3);
-      margin-bottom: 16px;
-    }
-
-    /* ─── Inputs ─── */
-    .inputs-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .field { display: flex; flex-direction: column; gap: 8px; }
-
-    .field label {
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--text-2);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
-    .input-wrap { position: relative; }
-
-    .field input {
-      width: 100%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 10px 10px;
-      font-family: var(--font-mono);
-      font-size: 24px;
-      font-weight: 500;
-      color: var(--text);
-      text-align: center;
-      outline: none;
-      transition: border-color 0.2s, background 0.2s;
-      -moz-appearance: textfield;
-      appearance: textfield;
-    }
-
-    .field input::-webkit-outer-spin-button,
-    .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
-
-    .field input:focus {
-      border-color: var(--border-hi);
-      background: #1e2130;
-    }
-
-    .field input.has-value { color: var(--accent); }
-
-    .field .unit {
-      font-size: 10px;
-      color: var(--text-3);
-      text-align: center;
-      font-family: var(--font-mono);
-      margin-top: 4px;
-      letter-spacing: 0.04em;
-    }
-
-    /* ─── Button ─── */
-    .btn-check {
-      width: 100%;
-      padding: 16px;
-      background: var(--green-dim);
-      border: 1px solid rgba(110,231,160,0.25);
-      border-radius: 12px;
-      color: var(--green);
-      font-family: var(--font-body);
-      font-size: 15px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s, transform 0.1s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      letter-spacing: 0.01em;
-    }
-
-    .btn-check:hover {
-      background: rgba(110,231,160,0.18);
-      border-color: rgba(110,231,160,0.4);
-    }
-
-    .btn-check:active { transform: scale(0.99); }
-
-    .btn-check svg {
-      width: 18px;
-      height: 18px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    /* ─── Error ─── */
-    .error {
-      margin-top: 12px;
-      padding: 10px 14px;
-      background: var(--red-dim);
-      border: 1px solid rgba(255,107,107,0.2);
-      border-radius: 10px;
-      font-size: 13px;
-      color: var(--red);
-      display: none;
-    }
-
-    /* ─── Result ─── */
-    .result-card {
-      margin-top: 20px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-      display: none;
-      animation: fadeUp 0.4s ease both;
-    }
-
-    .result-card.show { display: block; }
-
-    .result-top {
-      padding: 24px 28px 20px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 12px;
-      border-radius: 40px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 14px;
-    }
-
-    .pill-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: currentColor;
-    }
-
-    .pill-low    { background: rgba(126,184,247,0.15); color: var(--blue); border: 1px solid rgba(126,184,247,0.25); }
-    .pill-normal { background: rgba(110,231,160,0.15); color: var(--green); border: 1px solid rgba(110,231,160,0.25); }
-    .pill-elevated { background: rgba(255,179,71,0.15); color: var(--amber); border: 1px solid rgba(255,179,71,0.25); }
-    .pill-high1  { background: rgba(255,140,0,0.15); color: #ff9a3c; border: 1px solid rgba(255,140,0,0.25); }
-    .pill-high2  { background: rgba(255,107,107,0.15); color: var(--red); border: 1px solid rgba(255,107,107,0.25); }
-    .pill-crisis { background: rgba(220,20,60,0.2); color: #ff4d6d; border: 1px solid rgba(220,20,60,0.3); }
-
-    .result-name {
-      font-family: var(--font-display);
-      font-size: 22px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      line-height: 1.2;
-    }
-
-    .result-desc {
-      font-size: 13.5px;
-      color: var(--text-2);
-      line-height: 1.7;
-    }
-
-    /* ─── Scale bar ─── */
-    .scale-wrap {
-      padding: 20px 28px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .scale-track {
-      height: 6px;
-      border-radius: 4px;
-      display: flex;
-      overflow: hidden;
-      margin-bottom: 8px;
-    }
-
-    .scale-seg { height: 100%; flex: 1; }
-
-    .scale-marker-wrap {
-      position: relative;
-      height: 16px;
-    }
-
-    .scale-arrow {
-      position: absolute;
-      transform: translateX(-50%);
-      top: 0;
-      width: 0;
-      height: 0;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-top: 7px solid var(--text);
-      transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .scale-xlabels {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 4px;
-    }
-
-    .scale-xlabels span {
-      font-size: 9px;
-      font-family: var(--font-mono);
-      color: var(--text-3);
-      letter-spacing: 0.03em;
-    }
-
-    /* ─── Stats row ─── */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .stat-item {
-      padding: 16px 20px;
-      text-align: center;
-      border-right: 1px solid var(--border);
-    }
-
-    .stat-item:last-child { border-right: none; }
-
-    .stat-val {
-      font-family: var(--font-mono);
-      font-size: 20px;
-      font-weight: 500;
-      color: var(--text);
-      line-height: 1;
-      margin-bottom: 5px;
-    }
-
-    .stat-lbl {
-      font-size: 10px;
-      color: var(--text-3);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    /* ─── Tip ─── */
-    .result-tip {
-      padding: 16px 28px;
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-    }
-
-    .tip-icon {
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .tip-icon svg {
-      width: 16px;
-      height: 16px;
-      stroke: var(--text-3);
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .result-tip p {
-      font-size: 12.5px;
-      color: var(--text-2);
-      line-height: 1.7;
-    }
-
-    /* ─── Reference table ─── */
-    .reference {
-      margin-top: 28px;
-      animation: fadeUp 0.6s 0.2s ease both;
-    }
-
-    .ref-title {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-3);
-      margin-bottom: 14px;
-      padding: 0 2px;
-    }
-
-    .ref-table {
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-    }
-
-    .ref-row {
-      display: grid;
-      grid-template-columns: 12px 1fr 1fr;
-      gap: 12px;
-      padding: 12px 18px;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-      transition: background 0.15s;
-    }
-
-    .ref-row:last-child { border-bottom: none; }
-    .ref-row:hover { background: var(--surface2); }
-    .ref-row.header-row { pointer-events: none; background: transparent; }
-
-    .ref-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-
-    .ref-cat {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--text);
-    }
-
-    .ref-range {
-      font-size: 12px;
-      color: var(--text-2);
-      font-family: var(--font-mono);
-    }
-
-    .ref-col-label {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text-3);
-    }
-
-    /* ─── Footer ─── */
-    footer {
-      text-align: center;
-      margin-top: 40px;
-      font-size: 12px;
-      color: var(--text-3);
-      line-height: 1.8;
-      animation: fadeUp 0.6s 0.3s ease both;
-    }
-
-    footer a { color: var(--text-2); text-decoration: none; }
-
-    /* ─── Animations ─── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes pulse-ring {
-      0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(110,231,160,0.3); }
-      70%  { transform: scale(1);    box-shadow: 0 0 0 10px rgba(110,231,160,0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(110,231,160,0); }
-    }
-
-    .header-icon { animation: pulse-ring 3s infinite; }
-
-    /* ─── Responsive ─── */
-    @media (max-width: 480px) {
-      .page-wrap { padding: 40px 16px 60px; }
-      .header h1 { font-size: 28px; }
-      .card { padding: 24px 20px; }
-      .result-top { padding: 20px; }
-      .scale-wrap, .result-tip { padding-left: 20px; padding-right: 20px; }
-      .stat-item { padding: 14px 10px; }
-      .stat-val { font-size: 17px; }
-      .inputs-grid { gap: 8px; }
-      .field input { font-size: 20px; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VitalTrack — Blood Pressure Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080b10;
+  --bg2:#0d1018;
+  --surface:#111520;
+  --surface2:#171c2c;
+  --surface3:#1d2235;
+  --border:rgba(255,255,255,0.06);
+  --border2:rgba(255,255,255,0.11);
+  --text:#edeae3;
+  --text2:#8a8799;
+  --text3:#4a4860;
+  --teal:#4fd1c5;
+  --teal-dim:rgba(79,209,197,0.1);
+  --teal-glow:rgba(79,209,197,0.15);
+  --rose:#f87171;
+  --rose-dim:rgba(248,113,113,0.1);
+  --amber:#fbbf24;
+  --amber-dim:rgba(251,191,36,0.1);
+  --blue:#60a5fa;
+  --blue-dim:rgba(96,165,250,0.1);
+  --green:#4ade80;
+  --green-dim:rgba(74,222,128,0.1);
+  --fd:'Cormorant Garamond',serif;
+  --fb:'DM Sans',sans-serif;
+  --fm:'DM Mono',monospace;
+  --r:14px;
+  --r2:20px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--fb);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 60% at 15% 5%,rgba(79,209,197,0.05) 0%,transparent 55%),radial-gradient(ellipse 50% 40% at 85% 90%,rgba(96,165,250,0.04) 0%,transparent 55%);pointer-events:none;z-index:0}
+
+/* ── PAGE SYSTEM ── */
+.page{display:none;position:relative;z-index:1;min-height:100vh}
+.page.active{display:block}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:100;backdrop-filter:blur(16px);background:rgba(8,11,16,0.85);border-bottom:1px solid var(--border);padding:0 24px}
+.nav-inner{max-width:1100px;margin:0 auto;height:56px;display:flex;align-items:center;justify-content:space-between}
+.nav-brand{display:flex;align-items:center;gap:10px;cursor:pointer}
+.nav-logo{width:32px;height:32px;border-radius:8px;background:var(--teal-dim);border:1px solid rgba(79,209,197,0.2);display:flex;align-items:center;justify-content:center}
+.nav-logo svg{width:16px;height:16px;stroke:var(--teal);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav-name{font-family:var(--fd);font-size:18px;font-weight:600;letter-spacing:0.01em}
+.nav-right{display:flex;align-items:center;gap:8px}
+.nav-user{font-size:13px;color:var(--text2);padding:6px 12px}
+.btn-nav{padding:7px 16px;border-radius:8px;font-family:var(--fb);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;border:1px solid var(--border2);background:transparent;color:var(--text2)}
+.btn-nav:hover{background:var(--surface2);color:var(--text)}
+.btn-nav.primary{background:var(--teal-dim);border-color:rgba(79,209,197,0.25);color:var(--teal)}
+.btn-nav.primary:hover{background:rgba(79,209,197,0.18)}
+
+/* ── AUTH PAGES ── */
+.auth-wrap{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 56px);padding:40px 20px}
+.auth-card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.auth-header{padding:32px 32px 24px;border-bottom:1px solid var(--border);text-align:center}
+.auth-icon{width:52px;height:52px;border-radius:14px;background:var(--teal-dim);border:1px solid rgba(79,209,197,0.2);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.auth-icon svg{width:24px;height:24px;stroke:var(--teal);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.auth-title{font-family:var(--fd);font-size:26px;font-weight:600;margin-bottom:6px}
+.auth-sub{font-size:13px;color:var(--text2)}
+.auth-body{padding:28px 32px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.field label{font-size:11px;font-weight:500;color:var(--text2);letter-spacing:0.07em;text-transform:uppercase}
+.field input,.field select{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-family:var(--fb);font-size:14px;color:var(--text);outline:none;transition:border-color 0.15s,background 0.15s;width:100%;appearance:none}
+.field input:focus,.field select:focus{border-color:rgba(79,209,197,0.4);background:var(--surface3)}
+.field select option{background:var(--surface2)}
+.btn-primary{width:100%;padding:13px;background:var(--teal-dim);border:1px solid rgba(79,209,197,0.3);border-radius:10px;color:var(--teal);font-family:var(--fb);font-size:14px;font-weight:500;cursor:pointer;transition:all 0.15s;margin-top:6px}
+.btn-primary:hover{background:rgba(79,209,197,0.18);border-color:rgba(79,209,197,0.5)}
+.btn-primary:active{transform:scale(0.99)}
+.auth-footer{padding:16px 32px;border-top:1px solid var(--border);text-align:center;font-size:13px;color:var(--text2)}
+.auth-footer a{color:var(--teal);cursor:pointer;text-decoration:none}
+.auth-footer a:hover{text-decoration:underline}
+.form-msg{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none}
+.form-msg.error{background:var(--rose-dim);border:1px solid rgba(248,113,113,0.2);color:var(--rose)}
+.form-msg.success{background:var(--green-dim);border:1px solid rgba(74,222,128,0.2);color:var(--green)}
+
+/* ── MAIN APP LAYOUT ── */
+.app-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px)}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:24px 16px}
+.sidebar-section{margin-bottom:8px}
+.sidebar-label{font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);padding:0 10px;margin-bottom:8px}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;cursor:pointer;transition:background 0.12s,color 0.12s;font-size:14px;font-weight:500;color:var(--text2);margin-bottom:2px}
+.sidebar-item:hover{background:var(--surface2);color:var(--text)}
+.sidebar-item.active{background:var(--teal-dim);color:var(--teal)}
+.sidebar-item svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.main-content{padding:36px 40px;overflow-y:auto}
+
+/* ── ANALYZER PAGE ── */
+.page-title{font-family:var(--fd);font-size:32px;font-weight:600;margin-bottom:6px;line-height:1.15}
+.page-title em{font-style:italic;color:var(--teal)}
+.page-desc{font-size:14px;color:var(--text2);margin-bottom:32px;line-height:1.6}
+.analyzer-grid{display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:start}
+.analyzer-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:28px}
+.card-section-label{font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--text3);margin-bottom:16px}
+.readings-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+.r-field{display:flex;flex-direction:column;gap:6px}
+.r-field label{font-size:11px;font-weight:500;color:var(--text2);letter-spacing:0.07em;text-transform:uppercase;text-align:center}
+.r-field input{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px 8px 10px;font-family:var(--fm);font-size:26px;font-weight:500;color:var(--text);text-align:center;outline:none;transition:border-color 0.15s,background 0.15s;width:100%;-moz-appearance:textfield;appearance:textfield}
+.r-field input::-webkit-outer-spin-button,.r-field input::-webkit-inner-spin-button{-webkit-appearance:none}
+.r-field input:focus{border-color:rgba(79,209,197,0.4);background:var(--surface3)}
+.r-field input.filled{color:var(--teal)}
+.r-field .unit{font-size:10px;color:var(--text3);text-align:center;font-family:var(--fm);margin-top:3px}
+.btn-analyze{width:100%;padding:14px;background:var(--teal-dim);border:1px solid rgba(79,209,197,0.28);border-radius:11px;color:var(--teal);font-family:var(--fb);font-size:14px;font-weight:500;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-analyze:hover{background:rgba(79,209,197,0.18);border-color:rgba(79,209,197,0.45)}
+.btn-analyze svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.err-msg{font-size:13px;color:var(--rose);margin-top:10px;display:none;padding:10px 14px;background:var(--rose-dim);border-radius:8px;border:1px solid rgba(248,113,113,0.2)}
+
+/* ── RESULT PANEL ── */
+.result-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.result-empty{padding:48px 24px;text-align:center;color:var(--text3)}
+.result-empty svg{width:36px;height:36px;stroke:var(--text3);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 14px;display:block}
+.result-empty p{font-size:13px;line-height:1.6}
+.result-body{display:none}
+.result-body.show{display:block}
+.res-top{padding:22px 24px 18px;border-bottom:1px solid var(--border)}
+.status-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:40px;font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;margin-bottom:12px}
+.pill-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.p-low{background:rgba(96,165,250,0.13);color:var(--blue);border:1px solid rgba(96,165,250,0.22)}
+.p-normal{background:rgba(74,222,128,0.13);color:var(--green);border:1px solid rgba(74,222,128,0.22)}
+.p-elevated{background:rgba(251,191,36,0.13);color:var(--amber);border:1px solid rgba(251,191,36,0.22)}
+.p-high1{background:rgba(251,146,60,0.13);color:#fb923c;border:1px solid rgba(251,146,60,0.22)}
+.p-high2{background:rgba(248,113,113,0.13);color:var(--rose);border:1px solid rgba(248,113,113,0.22)}
+.p-crisis{background:rgba(220,38,38,0.2);color:#ff6b6b;border:1px solid rgba(220,38,38,0.3)}
+.res-name{font-family:var(--fd);font-size:20px;font-weight:600;margin-bottom:6px;line-height:1.2}
+.res-desc{font-size:13px;color:var(--text2);line-height:1.65}
+.scale-wrap{padding:16px 24px;border-bottom:1px solid var(--border)}
+.scale-track{height:5px;border-radius:3px;display:flex;overflow:hidden;margin-bottom:6px}
+.scale-seg{height:100%;flex:1}
+.scale-ptr-row{position:relative;height:14px}
+.scale-ptr{position:absolute;transform:translateX(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid var(--text);transition:left 0.55s cubic-bezier(0.34,1.56,0.64,1)}
+.scale-labels{display:flex;justify-content:space-between}
+.scale-labels span{font-size:9px;font-family:var(--fm);color:var(--text3);letter-spacing:0.02em}
+.res-stats{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--border)}
+.res-stat{padding:14px 18px;text-align:center;border-right:1px solid var(--border)}
+.res-stat:last-child{border-right:none}
+.res-stat-val{font-family:var(--fm);font-size:19px;font-weight:500;color:var(--text);line-height:1;margin-bottom:4px}
+.res-stat-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em}
+.res-tip{padding:14px 24px;border-bottom:1px solid var(--border);display:flex;gap:8px}
+.res-tip svg{width:15px;height:15px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;margin-top:1px}
+.res-tip p{font-size:12px;color:var(--text2);line-height:1.65}
+.save-section{padding:16px 24px}
+.btn-save{width:100%;padding:12px;background:transparent;border:1px solid var(--border2);border-radius:10px;color:var(--text2);font-family:var(--fb);font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-save:hover{background:var(--surface2);color:var(--text);border-color:rgba(79,209,197,0.3)}
+.btn-save svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn-save.saved{background:var(--green-dim);border-color:rgba(74,222,128,0.3);color:var(--green)}
+.btn-save:disabled{opacity:0.6;cursor:not-allowed}
+
+/* ── DASHBOARD PAGE ── */
+.dash-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px}
+.dash-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px}
+.dash-stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.dsc-label{font-size:11px;font-weight:500;color:var(--text2);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px}
+.dsc-val{font-family:var(--fm);font-size:28px;font-weight:500;line-height:1;margin-bottom:4px}
+.dsc-sub{font-size:11px;color:var(--text3)}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:24px;margin-bottom:24px}
+.chart-title{font-family:var(--fd);font-size:18px;font-weight:600;margin-bottom:20px}
+canvas#bpChart{width:100%!important;max-height:220px}
+.history-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden}
+.history-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.history-title{font-family:var(--fd);font-size:18px;font-weight:600}
+.history-count{font-size:12px;color:var(--text2)}
+.history-table{width:100%;border-collapse:collapse}
+.history-table thead tr{border-bottom:1px solid var(--border)}
+.history-table th{padding:10px 24px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)}
+.history-table tbody tr{border-bottom:1px solid var(--border);transition:background 0.12s}
+.history-table tbody tr:last-child{border-bottom:none}
+.history-table tbody tr:hover{background:var(--surface2)}
+.history-table td{padding:14px 24px;font-size:13.5px}
+.td-date{color:var(--text2);font-family:var(--fm);font-size:12px}
+.td-reading{font-family:var(--fm);font-weight:500;color:var(--text)}
+.td-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.empty-history{padding:48px 24px;text-align:center;color:var(--text3)}
+.empty-history svg{width:32px;height:32px;stroke:var(--text3);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 12px;display:block}
+.empty-history p{font-size:13px}
+.btn-delete{background:none;border:none;cursor:pointer;color:var(--text3);padding:4px;border-radius:6px;transition:color 0.12s,background 0.12px;display:flex}
+.btn-delete:hover{color:var(--rose);background:var(--rose-dim)}
+.btn-delete svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface2);border:1px solid var(--border2);border-radius:40px;padding:10px 20px;font-size:13px;font-weight:500;color:var(--text);z-index:999;opacity:0;transition:opacity 0.25s,transform 0.25s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.green{border-color:rgba(74,222,128,0.3);color:var(--green)}
+.toast.red{border-color:rgba(248,113,113,0.3);color:var(--rose)}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.fadeUp{animation:fadeUp 0.5s ease both}
+.fadeUp2{animation:fadeUp 0.5s 0.1s ease both}
+.fadeUp3{animation:fadeUp 0.5s 0.2s ease both}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .app-layout{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .analyzer-grid{grid-template-columns:1fr}
+  .main-content{padding:24px 20px}
+  .dash-stats{grid-template-columns:1fr 1fr}
+}
+@media(max-width:500px){
+  .readings-grid{gap:8px}
+  .r-field input{font-size:20px}
+  .auth-body{padding:24px 20px}
+  .auth-header{padding:24px 20px 18px}
+  .auth-footer{padding:14px 20px}
+  .dash-stats{grid-template-columns:1fr}
+}
+</style>
 </head>
 <body>
 
-  <div class="page-wrap">
-
-    <!-- Header -->
-    <header class="header">
-      <div class="header-icon">
-        <svg viewBox="0 0 24 24">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-        </svg>
-      </div>
-      <h1>Blood Pressure<br><em>Analyzer</em></h1>
-      <p>Enter your three readings from your BP monitor to understand your cardiovascular health.</p>
-    </header>
-
-    <!-- Input card -->
-    <div class="card">
-      <div class="section-label">Your Readings</div>
-
-      <div class="inputs-grid">
-        <div class="field">
-          <label for="sys">Systolic</label>
-          <input type="number" id="sys" placeholder="120" min="60" max="250" inputmode="numeric">
-          <div class="unit">mmHg</div>
-        </div>
-        <div class="field">
-          <label for="dia">Diastolic</label>
-          <input type="number" id="dia" placeholder="80" min="40" max="150" inputmode="numeric">
-          <div class="unit">mmHg</div>
-        </div>
-        <div class="field">
-          <label for="pulse">Pulse</label>
-          <input type="number" id="pulse" placeholder="72" min="30" max="200" inputmode="numeric">
-          <div class="unit">bpm</div>
-        </div>
-      </div>
-
-      <button class="btn-check" onclick="checkBP()">
+<!-- ══ NAV ══ -->
+<nav id="nav" style="display:none">
+  <div class="nav-inner">
+    <div class="nav-brand" onclick="navigate('analyzer')">
+      <div class="nav-logo">
         <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Analyze My Blood Pressure
-      </button>
-
-      <div class="error" id="error-msg">
-        Please enter valid values for all three readings before analyzing.
       </div>
-
-      <!-- Result (inside card) -->
-      <div class="result-card" id="result-card">
-
-        <div class="result-top">
-          <div class="status-pill" id="status-pill">
-            <div class="pill-dot"></div>
-            <span id="pill-label">Normal</span>
-          </div>
-          <div class="result-name" id="result-name">Normal Blood Pressure</div>
-          <div class="result-desc" id="result-desc"></div>
-        </div>
-
-        <div class="scale-wrap">
-          <div class="scale-track">
-            <div class="scale-seg" style="background:#3a6ea5;"></div>
-            <div class="scale-seg" style="background:#2d7a4f;"></div>
-            <div class="scale-seg" style="background:#8a6b00;"></div>
-            <div class="scale-seg" style="background:#a05a00;"></div>
-            <div class="scale-seg" style="background:#8b2020;"></div>
-            <div class="scale-seg" style="background:#5a0000;"></div>
-          </div>
-          <div class="scale-marker-wrap">
-            <div class="scale-arrow" id="scale-arrow" style="left: 25%;"></div>
-          </div>
-          <div class="scale-xlabels">
-            <span>Low</span>
-            <span>Normal</span>
-            <span>Elevated</span>
-            <span>High 1</span>
-            <span>High 2</span>
-            <span>Crisis</span>
-          </div>
-        </div>
-
-        <div class="stats-row">
-          <div class="stat-item">
-            <div class="stat-val" id="disp-sys">—</div>
-            <div class="stat-lbl">Systolic</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-val" id="disp-dia">—</div>
-            <div class="stat-lbl">Diastolic</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-val" id="disp-pulse">—</div>
-            <div class="stat-lbl">Pulse</div>
-          </div>
-        </div>
-
-        <div class="result-tip">
-          <div class="tip-icon">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          </div>
-          <p id="tip-text"></p>
-        </div>
-
-      </div>
+      <span class="nav-name">VitalTrack</span>
     </div>
-
-    <!-- Reference table -->
-    <div class="reference">
-      <div class="ref-title">BP Classification Reference</div>
-      <div class="ref-table">
-        <div class="ref-row header-row">
-          <div></div>
-          <div class="ref-col-label">Category</div>
-          <div class="ref-col-label">Systolic / Diastolic</div>
-        </div>
-        <div class="ref-row">
-          <div class="ref-dot" style="background:#3a6ea5;"></div>
-          <div class="ref-cat">Low (Hypotension)</div>
-          <div class="ref-range">Below 90 / 60</div>
-        </div>
-        <div class="ref-row">
-          <div class="ref-dot" style="background:#2d7a4f;"></div>
-          <div class="ref-cat">Normal</div>
-          <div class="ref-range">Below 120 / 80</div>
-        </div>
-        <div class="ref-row">
-          <div class="ref-dot" style="background:#8a6b00;"></div>
-          <div class="ref-cat">Elevated</div>
-          <div class="ref-range">120–129 / Below 80</div>
-        </div>
-        <div class="ref-row">
-          <div class="ref-dot" style="background:#a05a00;"></div>
-          <div class="ref-cat">High — Stage 1</div>
-          <div class="ref-range">130–139 / 80–89</div>
-        </div>
-        <div class="ref-row">
-          <div class="ref-dot" style="background:#8b2020;"></div>
-          <div class="ref-cat">High — Stage 2</div>
-          <div class="ref-range">140+ / 90+</div>
-        </div>
-        <div class="ref-row">
-          <div class="ref-dot" style="background:#5a0000;"></div>
-          <div class="ref-cat">Hypertensive Crisis</div>
-          <div class="ref-range">180+ / 120+</div>
-        </div>
-      </div>
+    <div class="nav-right">
+      <span class="nav-user" id="nav-user-name"></span>
+      <button class="btn-nav" onclick="navigate('dashboard')">Dashboard</button>
+      <button class="btn-nav primary" onclick="signOut()">Sign Out</button>
     </div>
-
-    <footer>
-      <p>Based on the American Heart Association (AHA) classification guidelines.</p>
-      <p style="margin-top:6px;">This tool is for informational purposes only.<br>Always consult a qualified healthcare professional for medical advice.</p>
-    </footer>
-
   </div>
+</nav>
 
-  <script>
-    // Highlight input values as they're typed
-    ['sys','dia','pulse'].forEach(function(id) {
-      document.getElementById(id).addEventListener('input', function() {
-        this.classList.toggle('has-value', this.value.length > 0);
-      });
-    });
+<!-- ══ PAGE: SIGN IN ══ -->
+<div class="page active" id="page-signin">
+  <div class="auth-wrap">
+    <div class="auth-card fadeUp">
+      <div class="auth-header">
+        <div class="auth-icon">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </div>
+        <div class="auth-title">Welcome back</div>
+        <div class="auth-sub">Sign in to access your BP records</div>
+      </div>
+      <div class="auth-body">
+        <div class="form-msg error" id="signin-err"></div>
+        <div class="field">
+          <label>Email address</label>
+          <input type="email" id="signin-email" placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="signin-pass" placeholder="••••••••">
+        </div>
+        <button class="btn-primary" onclick="doSignIn()">Sign In</button>
+      </div>
+      <div class="auth-footer">
+        Don't have an account? <a onclick="showPage('page-signup')">Create one</a>
+      </div>
+    </div>
+  </div>
+</div>
 
-    // Enter key support
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') checkBP();
-    });
+<!-- ══ PAGE: SIGN UP ══ -->
+<div class="page" id="page-signup">
+  <div class="auth-wrap">
+    <div class="auth-card fadeUp">
+      <div class="auth-header">
+        <div class="auth-icon">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="auth-title">Create Account</div>
+        <div class="auth-sub">Start tracking your blood pressure today</div>
+      </div>
+      <div class="auth-body">
+        <div class="form-msg error" id="signup-err"></div>
+        <div class="form-row">
+          <div class="field">
+            <label>First Name</label>
+            <input type="text" id="su-fname" placeholder="First">
+          </div>
+          <div class="field">
+            <label>Last Name</label>
+            <input type="text" id="su-lname" placeholder="Last">
+          </div>
+        </div>
+        <div class="field">
+          <label>Email address</label>
+          <input type="email" id="su-email" placeholder="you@example.com">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="su-pass" placeholder="At least 6 characters">
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Date of Birth</label>
+            <input type="date" id="su-dob">
+          </div>
+          <div class="field">
+            <label>Gender</label>
+            <select id="su-gender">
+              <option value="">Select</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+              <option value="prefer_not">Prefer not to say</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="doSignUp()">Create Account</button>
+      </div>
+      <div class="auth-footer">
+        Already have an account? <a onclick="showPage('page-signin')">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
 
-    function checkBP() {
-      var sys   = parseInt(document.getElementById('sys').value);
-      var dia   = parseInt(document.getElementById('dia').value);
-      var pulse = parseInt(document.getElementById('pulse').value);
-      var errEl = document.getElementById('error-msg');
+<!-- ══ PAGE: APP ══ -->
+<div class="page" id="page-app">
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Menu</div>
+        <div class="sidebar-item active" id="sb-analyzer" onclick="navigate('analyzer')">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Analyzer
+        </div>
+        <div class="sidebar-item" id="sb-dashboard" onclick="navigate('dashboard')">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </div>
+      </div>
+    </aside>
 
-      if (!sys || !dia || !pulse || sys < 60 || sys > 250 || dia < 40 || dia > 150 || pulse < 30 || pulse > 200) {
-        errEl.style.display = 'block';
-        document.getElementById('result-card').classList.remove('show');
-        return;
+    <!-- Main content area -->
+    <main class="main-content">
+
+      <!-- ── ANALYZER VIEW ── -->
+      <div id="view-analyzer">
+        <div class="page-title fadeUp">Analyze Your <em>Blood Pressure</em></div>
+        <div class="page-desc fadeUp2">Enter today's readings from your BP monitor for an instant health assessment.</div>
+
+        <div class="analyzer-grid">
+          <div class="analyzer-card fadeUp">
+            <div class="card-section-label">Today's Readings</div>
+            <div class="readings-grid">
+              <div class="r-field">
+                <label>Systolic</label>
+                <input type="number" id="sys" placeholder="120" min="60" max="250" inputmode="numeric">
+                <div class="unit">mmHg</div>
+              </div>
+              <div class="r-field">
+                <label>Diastolic</label>
+                <input type="number" id="dia" placeholder="80" min="40" max="150" inputmode="numeric">
+                <div class="unit">mmHg</div>
+              </div>
+              <div class="r-field">
+                <label>Pulse</label>
+                <input type="number" id="pul" placeholder="72" min="30" max="200" inputmode="numeric">
+                <div class="unit">bpm</div>
+              </div>
+            </div>
+            <button class="btn-analyze" onclick="analyze()">
+              <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Analyze
+            </button>
+            <div class="err-msg" id="err-msg">Please enter valid values for all three readings.</div>
+          </div>
+
+          <!-- Result panel -->
+          <div class="result-panel fadeUp2">
+            <div class="result-empty" id="result-empty">
+              <svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              <p>Enter your readings and press<br>Analyze to see your result</p>
+            </div>
+            <div class="result-body" id="result-body">
+              <div class="res-top">
+                <div class="status-pill" id="res-pill"><div class="pill-dot"></div><span id="pill-txt"></span></div>
+                <div class="res-name" id="res-name"></div>
+                <div class="res-desc" id="res-desc"></div>
+              </div>
+              <div class="scale-wrap">
+                <div class="scale-track">
+                  <div class="scale-seg" style="background:#2563a8"></div>
+                  <div class="scale-seg" style="background:#166534"></div>
+                  <div class="scale-seg" style="background:#854d0e"></div>
+                  <div class="scale-seg" style="background:#9a3412"></div>
+                  <div class="scale-seg" style="background:#991b1b"></div>
+                  <div class="scale-seg" style="background:#450a0a"></div>
+                </div>
+                <div class="scale-ptr-row">
+                  <div class="scale-ptr" id="scale-ptr" style="left:25%"></div>
+                </div>
+                <div class="scale-labels">
+                  <span>Low</span><span>Normal</span><span>Elev.</span><span>High 1</span><span>High 2</span><span>Crisis</span>
+                </div>
+              </div>
+              <div class="res-stats">
+                <div class="res-stat"><div class="res-stat-val" id="r-sys">—</div><div class="res-stat-lbl">Systolic</div></div>
+                <div class="res-stat"><div class="res-stat-val" id="r-dia">—</div><div class="res-stat-lbl">Diastolic</div></div>
+                <div class="res-stat"><div class="res-stat-val" id="r-pul">—</div><div class="res-stat-lbl">Pulse</div></div>
+              </div>
+              <div class="res-tip">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <p id="res-tip"></p>
+              </div>
+              <div class="save-section">
+                <button class="btn-save" id="btn-save" onclick="saveReading()">
+                  <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                  Save My Reading for Today
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reference table -->
+        <div style="margin-top:28px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;" class="fadeUp3">
+          <div style="padding:18px 24px;border-bottom:1px solid var(--border);">
+            <div style="font-family:var(--fd);font-size:17px;font-weight:600;">BP Classification Reference</div>
+          </div>
+          <table class="history-table">
+            <thead><tr><th></th><th>Category</th><th>Systolic</th><th>Diastolic</th></tr></thead>
+            <tbody>
+              <tr><td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#2563a8"></span></td><td>Low (Hypotension)</td><td class="td-reading" style="font-size:13px">Below 90</td><td class="td-reading" style="font-size:13px">Below 60</td></tr>
+              <tr><td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#166534"></span></td><td>Normal</td><td class="td-reading" style="font-size:13px">Below 120</td><td class="td-reading" style="font-size:13px">Below 80</td></tr>
+              <tr><td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#854d0e"></span></td><td>Elevated</td><td class="td-reading" style="font-size:13px">120 – 129</td><td class="td-reading" style="font-size:13px">Below 80</td></tr>
+              <tr><td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#9a3412"></span></td><td>High Stage 1</td><td class="td-reading" style="font-size:13px">130 – 139</td><td class="td-reading" style="font-size:13px">80 – 89</td></tr>
+              <tr><td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#991b1b"></span></td><td>High Stage 2</td><td class="td-reading" style="font-size:13px">140+</td><td class="td-reading" style="font-size:13px">90+</td></tr>
+              <tr><td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#450a0a"></span></td><td>Hypertensive Crisis</td><td class="td-reading" style="font-size:13px">180+</td><td class="td-reading" style="font-size:13px">120+</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── DASHBOARD VIEW ── -->
+      <div id="view-dashboard" style="display:none">
+        <div class="dash-header">
+          <div>
+            <div class="page-title fadeUp">Your <em>Dashboard</em></div>
+            <div class="page-desc fadeUp2" style="margin-bottom:0">Track your blood pressure history and trends.</div>
+          </div>
+        </div>
+
+        <div class="dash-stats fadeUp">
+          <div class="dash-stat-card">
+            <div class="dsc-label">Total Readings</div>
+            <div class="dsc-val" id="stat-total" style="color:var(--teal)">0</div>
+            <div class="dsc-sub">All time</div>
+          </div>
+          <div class="dash-stat-card">
+            <div class="dsc-label">Avg Systolic</div>
+            <div class="dsc-val" id="stat-avg-sys" style="color:var(--amber)">—</div>
+            <div class="dsc-sub">mmHg</div>
+          </div>
+          <div class="dash-stat-card">
+            <div class="dsc-label">Avg Diastolic</div>
+            <div class="dsc-val" id="stat-avg-dia" style="color:var(--blue)">—</div>
+            <div class="dsc-sub">mmHg</div>
+          </div>
+        </div>
+
+        <div class="chart-card fadeUp2">
+          <div class="chart-title">Blood Pressure Trend</div>
+          <canvas id="bpChart" height="200"></canvas>
+          <div id="chart-empty" style="text-align:center;padding:40px 0;color:var(--text3);font-size:13px;display:none">No readings yet. Save your first reading to see the chart.</div>
+        </div>
+
+        <div class="history-card fadeUp3">
+          <div class="history-header">
+            <div class="history-title">Reading History</div>
+            <div class="history-count" id="history-count">0 records</div>
+          </div>
+          <div id="history-body">
+            <div class="empty-history">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              <p>No readings saved yet.<br>Analyze and save your first reading!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+// ════════════════════════════════════════
+// STORAGE HELPERS  (localStorage, per user)
+// ════════════════════════════════════════
+var USERS_KEY = 'vt_users';
+var SESSION_KEY = 'vt_session';
+
+function getUsers() { return JSON.parse(localStorage.getItem(USERS_KEY) || '{}'); }
+function saveUsers(u) { localStorage.setItem(USERS_KEY, JSON.stringify(u)); }
+function getSession() { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); }
+function setSession(s) { localStorage.setItem(SESSION_KEY, JSON.stringify(s)); }
+function clearSession() { localStorage.removeItem(SESSION_KEY); }
+
+function getReadings(email) {
+  var users = getUsers();
+  return (users[email] && users[email].readings) ? users[email].readings : [];
+}
+
+function saveReadingsForUser(email, readings) {
+  var users = getUsers();
+  if (!users[email]) return;
+  users[email].readings = readings;
+  saveUsers(users);
+}
+
+// ════════════════════════════════════════
+// PAGE ROUTER
+// ════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  var isApp = id === 'page-app';
+  document.getElementById('nav').style.display = isApp ? 'block' : 'none';
+}
+
+function navigate(view) {
+  document.getElementById('view-analyzer').style.display = view === 'analyzer' ? 'block' : 'none';
+  document.getElementById('view-dashboard').style.display = view === 'dashboard' ? 'block' : 'none';
+  document.getElementById('sb-analyzer').classList.toggle('active', view === 'analyzer');
+  document.getElementById('sb-dashboard').classList.toggle('active', view === 'dashboard');
+  if (view === 'dashboard') renderDashboard();
+}
+
+// ════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════
+function doSignUp() {
+  var fname  = document.getElementById('su-fname').value.trim();
+  var lname  = document.getElementById('su-lname').value.trim();
+  var email  = document.getElementById('su-email').value.trim().toLowerCase();
+  var pass   = document.getElementById('su-pass').value;
+  var dob    = document.getElementById('su-dob').value;
+  var gender = document.getElementById('su-gender').value;
+  var errEl  = document.getElementById('signup-err');
+
+  if (!fname || !lname || !email || !pass || !dob || !gender) {
+    showFormMsg(errEl, 'Please fill in all fields.'); return;
+  }
+  if (pass.length < 6) {
+    showFormMsg(errEl, 'Password must be at least 6 characters.'); return;
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showFormMsg(errEl, 'Please enter a valid email address.'); return;
+  }
+
+  var users = getUsers();
+  if (users[email]) {
+    showFormMsg(errEl, 'An account with this email already exists.'); return;
+  }
+
+  users[email] = { fname:fname, lname:lname, email:email, pass:pass, dob:dob, gender:gender, readings:[] };
+  saveUsers(users);
+  setSession({ email:email, name:fname });
+  enterApp({ email:email, name:fname });
+}
+
+function doSignIn() {
+  var email = document.getElementById('signin-email').value.trim().toLowerCase();
+  var pass  = document.getElementById('signin-pass').value;
+  var errEl = document.getElementById('signin-err');
+
+  if (!email || !pass) {
+    showFormMsg(errEl, 'Please enter your email and password.'); return;
+  }
+
+  var users = getUsers();
+  if (!users[email] || users[email].pass !== pass) {
+    showFormMsg(errEl, 'Invalid email or password.'); return;
+  }
+
+  setSession({ email:email, name:users[email].fname });
+  enterApp({ email:email, name:users[email].fname });
+}
+
+function enterApp(session) {
+  document.getElementById('nav-user-name').textContent = 'Hi, ' + session.name;
+  showPage('page-app');
+  navigate('analyzer');
+  resetAnalyzer();
+}
+
+function signOut() {
+  clearSession();
+  resetAnalyzer();
+  showPage('page-signin');
+}
+
+function showFormMsg(el, msg) {
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(function(){ el.style.display='none'; }, 4000);
+}
+
+// ════════════════════════════════════════
+// ANALYZER
+// ════════════════════════════════════════
+var currentResult = null;
+
+['sys','dia','pul'].forEach(function(id){
+  var el = document.getElementById(id);
+  if(el) el.addEventListener('input', function(){ this.classList.toggle('filled', this.value.length > 0); });
+});
+
+document.addEventListener('keydown', function(e){ if(e.key==='Enter' && document.getElementById('page-app').classList.contains('active')) analyze(); });
+
+function classify(sys, dia) {
+  if (sys < 90 || dia < 60)                             return {cat:'low',     pill:'p-low',    pct:8,  name:'Low Blood Pressure',           desc:'Your blood pressure is below the normal range (hypotension). This can cause dizziness, light-headedness, and fainting, especially when standing up.',                                                                   tip:'Stay hydrated, avoid prolonged standing, and rise slowly. Consult your doctor if symptoms persist.'};
+  if (sys < 120 && dia < 80)                            return {cat:'normal',  pill:'p-normal',  pct:25, name:'Normal Blood Pressure',         desc:'Your blood pressure is in the ideal healthy range. Both systolic and diastolic readings reflect good cardiovascular health.',                                                                                     tip:'Maintain a low-sodium diet, stay physically active, and get regular check-ups to keep it here.'};
+  if (sys >= 120 && sys <= 129 && dia < 80)             return {cat:'elevated',pill:'p-elevated',pct:42, name:'Elevated Blood Pressure',       desc:"Your systolic pressure is slightly above normal. This is a warning — you don't have hypertension yet, but you're on track to develop it without changes.",                                                       tip:'Reduce sodium, increase aerobic exercise, limit alcohol, and monitor regularly.'};
+  if ((sys >= 130 && sys <= 139) || (dia >= 80 && dia <= 89)) return {cat:'high1',pill:'p-high1',pct:58, name:'High Blood Pressure — Stage 1', desc:'Stage 1 hypertension. Doctors typically recommend lifestyle changes at this point, and may consider medication based on your overall cardiovascular risk.',                                             tip:'Speak with your doctor soon. Focus on reducing sodium, maintaining a healthy weight, and exercising regularly.'};
+  if (sys >= 180 || dia >= 120)                         return {cat:'crisis',  pill:'p-crisis',  pct:92, name:'Hypertensive Crisis',           desc:'This is a critical reading requiring immediate medical attention. Pressure this high can cause severe damage to the heart, brain, and kidneys.',                                                             tip:'Seek emergency medical care immediately. Call your local emergency number if you have chest pain, difficulty breathing, or vision changes.'};
+  return                                                       {cat:'high2',   pill:'p-high2',   pct:75, name:'High Blood Pressure — Stage 2', desc:'Stage 2 hypertension. This stage typically requires a combination of prescribed medication and significant lifestyle changes under medical supervision.',                                              tip:'Consult your doctor promptly. Untreated Stage 2 hypertension significantly raises the risk of heart attack and stroke.'};
+}
+
+function analyze() {
+  var sys = parseInt(document.getElementById('sys').value);
+  var dia = parseInt(document.getElementById('dia').value);
+  var pul = parseInt(document.getElementById('pul').value);
+  var errEl = document.getElementById('err-msg');
+
+  if (!sys||!dia||!pul||sys<60||sys>250||dia<40||dia>150||pul<30||pul>200) {
+    errEl.style.display='block';
+    setTimeout(function(){errEl.style.display='none';},3500);
+    return;
+  }
+  errEl.style.display='none';
+
+  var r = classify(sys, dia);
+  var pulseNote = pul<60 ? ' Your pulse is also low (below 60 bpm) — mention this to your doctor.' : pul>100 ? ' Your pulse is elevated above 100 bpm — worth discussing with your doctor.' : '';
+
+  document.getElementById('res-pill').className = 'status-pill ' + r.pill;
+  document.getElementById('pill-txt').textContent = r.name.replace('Blood Pressure — ','').replace('Blood Pressure','');
+  document.getElementById('res-name').textContent = r.name;
+  document.getElementById('res-desc').textContent = r.desc;
+  document.getElementById('res-tip').textContent  = r.tip + pulseNote;
+  document.getElementById('r-sys').textContent = sys;
+  document.getElementById('r-dia').textContent = dia;
+  document.getElementById('r-pul').textContent = pul;
+  document.getElementById('scale-ptr').style.left = r.pct + '%';
+
+  document.getElementById('result-empty').style.display = 'none';
+  var rb = document.getElementById('result-body');
+  rb.classList.remove('show');
+  void rb.offsetWidth;
+  rb.classList.add('show');
+
+  var saveBtn = document.getElementById('btn-save');
+  saveBtn.classList.remove('saved');
+  saveBtn.disabled = false;
+  saveBtn.innerHTML = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save My Reading for Today';
+
+  currentResult = { sys:sys, dia:dia, pulse:pul, cat:r.cat, label:r.name };
+
+  rb.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function resetAnalyzer() {
+  currentResult = null;
+  document.getElementById('sys').value = '';
+  document.getElementById('dia').value = '';
+  document.getElementById('pul').value = '';
+  ['sys','dia','pul'].forEach(function(id){ var el=document.getElementById(id); if(el) el.classList.remove('filled'); });
+  document.getElementById('result-empty').style.display = 'block';
+  document.getElementById('result-body').classList.remove('show');
+}
+
+// ════════════════════════════════════════
+// SAVE READING
+// ════════════════════════════════════════
+function saveReading() {
+  if (!currentResult) return;
+  var session = getSession();
+  if (!session) { showToast('Please sign in to save readings.','red'); return; }
+
+  var readings = getReadings(session.email);
+  var today = new Date().toISOString().split('T')[0];
+
+  // Check if already saved today
+  var todaySaved = readings.some(function(r){ return r.date === today; });
+  if (todaySaved) {
+    showToast("Today's reading is already saved.", 'red');
+    return;
+  }
+
+  var entry = {
+    date: today,
+    sys: currentResult.sys,
+    dia: currentResult.dia,
+    pulse: currentResult.pulse,
+    cat: currentResult.cat,
+    label: currentResult.label,
+    ts: Date.now()
+  };
+
+  readings.unshift(entry);
+  saveReadingsForUser(session.email, readings);
+
+  var btn = document.getElementById('btn-save');
+  btn.classList.add('saved');
+  btn.disabled = true;
+  btn.innerHTML = '<svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg> Reading Saved!';
+
+  showToast('Reading saved to your dashboard!', 'green');
+}
+
+// ════════════════════════════════════════
+// DASHBOARD
+// ════════════════════════════════════════
+var bpChartInstance = null;
+
+function renderDashboard() {
+  var session = getSession();
+  if (!session) return;
+
+  var readings = getReadings(session.email);
+  var count = readings.length;
+
+  document.getElementById('stat-total').textContent = count;
+  document.getElementById('history-count').textContent = count + (count===1?' record':' records');
+
+  if (count > 0) {
+    var avgSys = Math.round(readings.reduce(function(a,r){return a+r.sys;},0)/count);
+    var avgDia = Math.round(readings.reduce(function(a,r){return a+r.dia;},0)/count);
+    document.getElementById('stat-avg-sys').textContent = avgSys;
+    document.getElementById('stat-avg-dia').textContent = avgDia;
+  } else {
+    document.getElementById('stat-avg-sys').textContent = '—';
+    document.getElementById('stat-avg-dia').textContent = '—';
+  }
+
+  renderChart(readings);
+  renderHistory(readings, session.email);
+}
+
+function renderChart(readings) {
+  var canvas = document.getElementById('bpChart');
+  var emptyEl = document.getElementById('chart-empty');
+
+  if (readings.length === 0) {
+    canvas.style.display = 'none';
+    emptyEl.style.display = 'block';
+    if (bpChartInstance) { bpChartInstance.destroy(); bpChartInstance = null; }
+    return;
+  }
+
+  canvas.style.display = 'block';
+  emptyEl.style.display = 'none';
+
+  var sorted = readings.slice().reverse().slice(-14); // last 14 entries, oldest first
+  var labels = sorted.map(function(r){ return formatDateShort(r.date); });
+  var sysData = sorted.map(function(r){ return r.sys; });
+  var diaData = sorted.map(function(r){ return r.dia; });
+
+  if (bpChartInstance) { bpChartInstance.destroy(); }
+
+  bpChartInstance = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Systolic',
+          data: sysData,
+          borderColor: 'rgba(251,191,36,0.8)',
+          backgroundColor: 'rgba(251,191,36,0.08)',
+          pointBackgroundColor: 'rgba(251,191,36,1)',
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          borderWidth: 2,
+          fill: false,
+          tension: 0.35
+        },
+        {
+          label: 'Diastolic',
+          data: diaData,
+          borderColor: 'rgba(96,165,250,0.8)',
+          backgroundColor: 'rgba(96,165,250,0.08)',
+          pointBackgroundColor: 'rgba(96,165,250,1)',
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          borderWidth: 2,
+          fill: false,
+          tension: 0.35
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      interaction: { mode:'index', intersect:false },
+      plugins: {
+        legend: {
+          labels: {
+            color: 'rgba(138,135,153,1)',
+            font: { family:"'DM Sans',sans-serif", size:12 },
+            boxWidth: 10,
+            boxHeight: 10,
+            borderRadius: 3
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(23,28,44,0.97)',
+          borderColor: 'rgba(255,255,255,0.08)',
+          borderWidth: 1,
+          titleColor: '#edeae3',
+          bodyColor: '#8a8799',
+          padding: 12,
+          titleFont: { family:"'DM Mono',monospace", size:12 },
+          bodyFont: { family:"'DM Sans',sans-serif", size:12 }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color:'rgba(255,255,255,0.04)' },
+          ticks: { color:'rgba(74,72,96,1)', font:{ family:"'DM Mono',monospace", size:10 } }
+        },
+        y: {
+          grid: { color:'rgba(255,255,255,0.04)' },
+          ticks: { color:'rgba(74,72,96,1)', font:{ family:"'DM Mono',monospace", size:10 } },
+          min: 40
+        }
       }
-      errEl.style.display = 'none';
-
-      var cat, name, desc, tip, pillClass, pct;
-
-      if (sys < 90 || dia < 60) {
-        cat = 'low'; pillClass = 'pill-low'; pct = 8;
-        name = 'Low Blood Pressure';
-        desc = 'Your blood pressure is below the normal range — this is called hypotension. It can cause dizziness, light-headedness, and fatigue, especially when you stand up quickly (orthostatic hypotension).';
-        tip  = 'Stay well-hydrated, avoid prolonged standing, and rise slowly from seated or lying positions. Consult your doctor if symptoms occur frequently.';
-
-      } else if (sys < 120 && dia < 80) {
-        cat = 'normal'; pillClass = 'pill-normal'; pct = 25;
-        name = 'Normal Blood Pressure';
-        desc = 'Excellent — your blood pressure is within the ideal healthy range. Both your systolic and diastolic readings indicate good cardiovascular health at this moment.';
-        tip  = 'Maintain a balanced diet low in sodium, stay physically active, manage stress, and get regular check-ups to keep it in this range.';
-
-      } else if (sys >= 120 && sys <= 129 && dia < 80) {
-        cat = 'elevated'; pillClass = 'pill-elevated'; pct = 42;
-        name = 'Elevated Blood Pressure';
-        desc = 'Your systolic pressure is slightly above the normal threshold. This is a warning stage — you do not yet have hypertension, but you are at increased risk of developing it without lifestyle changes.';
-        tip  = 'Reduce sodium intake, increase aerobic exercise, limit alcohol, and manage stress. No medication is typically needed at this stage, but monitor regularly.';
-
-      } else if ((sys >= 130 && sys <= 139) || (dia >= 80 && dia <= 89)) {
-        cat = 'high1'; pillClass = 'pill-high1'; pct = 58;
-        name = 'High Blood Pressure — Stage 1';
-        desc = 'Your readings indicate Stage 1 hypertension. At this level, doctors typically recommend significant lifestyle changes and may consider prescribing medication depending on your overall cardiovascular risk.';
-        tip  = 'Speak with your doctor soon. Focus on reducing sodium, maintaining a healthy weight, exercising regularly, quitting smoking, and limiting alcohol intake.';
-
-      } else if (sys >= 180 || dia >= 120) {
-        cat = 'crisis'; pillClass = 'pill-crisis'; pct = 92;
-        name = 'Hypertensive Crisis';
-        desc = 'This is a critical blood pressure reading that requires immediate medical attention. Pressure at this level can cause serious damage to the heart, brain, kidneys, and blood vessels.';
-        tip  = 'Seek emergency medical care immediately — call your local emergency number. If you have symptoms such as chest pain, shortness of breath, back pain, difficulty speaking, or vision changes, do not wait.';
-
-      } else {
-        cat = 'high2'; pillClass = 'pill-high2'; pct = 75;
-        name = 'High Blood Pressure — Stage 2';
-        desc = 'Your readings indicate Stage 2 hypertension. This stage typically requires a combination of prescribed medication and meaningful lifestyle changes, managed under the supervision of a healthcare professional.';
-        tip  = 'Consult your doctor promptly. Untreated Stage 2 hypertension significantly increases the risk of heart attack, stroke, and kidney disease. Do not ignore these readings.';
-      }
-
-      // Pulse annotation
-      var pulseNote = '';
-      if      (pulse < 60)  pulseNote = ' Your resting pulse is also low (below 60 bpm, bradycardia range) — worth mentioning to your doctor.';
-      else if (pulse > 100) pulseNote = ' Your pulse is elevated above 100 bpm (tachycardia range) — this is worth discussing with your doctor too.';
-
-      // Update DOM
-      var pill = document.getElementById('status-pill');
-      pill.className = 'status-pill ' + pillClass;
-      document.getElementById('pill-label').textContent = cat.replace('high1','High Stage 1').replace('high2','High Stage 2').replace('crisis','Crisis').replace('normal','Normal').replace('elevated','Elevated').replace('low','Low');
-      document.getElementById('result-name').textContent = name;
-      document.getElementById('result-desc').textContent = desc;
-      document.getElementById('tip-text').textContent = tip + pulseNote;
-      document.getElementById('disp-sys').textContent   = sys;
-      document.getElementById('disp-dia').textContent   = dia;
-      document.getElementById('disp-pulse').textContent = pulse;
-      document.getElementById('scale-arrow').style.left = pct + '%';
-
-      // Show result
-      var rc = document.getElementById('result-card');
-      rc.classList.remove('show');
-      void rc.offsetWidth; // force reflow for re-animation
-      rc.classList.add('show');
-
-      // Smooth scroll to result
-      setTimeout(function() {
-        rc.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 100);
     }
-  </script>
+  });
+}
 
+function renderHistory(readings, email) {
+  var el = document.getElementById('history-body');
+  if (readings.length === 0) {
+    el.innerHTML = '<div class="empty-history"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><p>No readings saved yet.<br>Analyze and save your first reading!</p></div>';
+    return;
+  }
+
+  var rows = readings.map(function(r, i) {
+    return '<tr>' +
+      '<td class="td-date">' + formatDateLong(r.date) + '</td>' +
+      '<td class="td-reading">' + r.sys + ' / ' + r.dia + '</td>' +
+      '<td><span class="td-reading" style="font-size:13px">' + r.pulse + ' bpm</span></td>' +
+      '<td><span class="td-badge ' + pillClassFor(r.cat) + '">' + shortLabel(r.cat) + '</span></td>' +
+      '<td><button class="btn-delete" onclick="deleteReading(' + i + ')" title="Delete"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button></td>' +
+      '</tr>';
+  }).join('');
+
+  el.innerHTML = '<table class="history-table"><thead><tr><th>Date</th><th>BP (mmHg)</th><th>Pulse</th><th>Status</th><th></th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+
+function deleteReading(index) {
+  var session = getSession();
+  if (!session) return;
+  var readings = getReadings(session.email);
+  readings.splice(index, 1);
+  saveReadingsForUser(session.email, readings);
+  renderDashboard();
+  showToast('Reading deleted.', '');
+}
+
+function pillClassFor(cat) {
+  var map = { low:'p-low', normal:'p-normal', elevated:'p-elevated', high1:'p-high1', high2:'p-high2', crisis:'p-crisis' };
+  return map[cat] || 'p-normal';
+}
+
+function shortLabel(cat) {
+  var map = { low:'Low', normal:'Normal', elevated:'Elevated', high1:'High 1', high2:'High 2', crisis:'Crisis' };
+  return map[cat] || cat;
+}
+
+function formatDateLong(d) {
+  var dt = new Date(d + 'T12:00:00');
+  return dt.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function formatDateShort(d) {
+  var dt = new Date(d + 'T12:00:00');
+  return dt.toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+}
+
+// ════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════
+var toastTimer;
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' ' + type : '');
+  void t.offsetWidth;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2800);
+}
+
+// ════════════════════════════════════════
+// BOOT — check for existing session
+// ════════════════════════════════════════
+(function init() {
+  var session = getSession();
+  if (session) {
+    enterApp(session);
+  } else {
+    showPage('page-signin');
+  }
+})();
+</script>
 </body>
 </html>
