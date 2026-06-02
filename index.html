@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BP Check — Blood Pressure Analyzer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f14;
+      --surface: #13151c;
+      --surface2: #1a1d27;
+      --surface3: #21253300;
+      --border: rgba(255,255,255,0.07);
+      --border-hi: rgba(255,255,255,0.14);
+      --text: #f0eeea;
+      --text-2: #9996a0;
+      --text-3: #5c5a65;
+      --accent: #c8f0d0;
+      --accent-dim: rgba(200,240,208,0.12);
+      --red: #ff6b6b;
+      --red-dim: rgba(255,107,107,0.12);
+      --amber: #ffb347;
+      --amber-dim: rgba(255,179,71,0.12);
+      --blue: #7eb8f7;
+      --blue-dim: rgba(126,184,247,0.12);
+      --green: #6ee7a0;
+      --green-dim: rgba(110,231,160,0.12);
+      --font-display: 'Playfair Display', serif;
+      --font-body: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Background pattern */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 10%, rgba(110,231,160,0.04) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 80% 80%, rgba(126,184,247,0.04) 0%, transparent 60%),
+        repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(255,255,255,0.015) 80px),
+        repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(255,255,255,0.015) 80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .page-wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    /* ─── Header ─── */
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .header-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: var(--green-dim);
+      border: 1px solid rgba(110,231,160,0.2);
+      margin-bottom: 20px;
+    }
+
+    .header-icon svg {
+      width: 26px;
+      height: 26px;
+      stroke: var(--green);
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .header h1 {
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+
+    .header h1 em {
+      font-style: italic;
+      color: var(--green);
+    }
+
+    .header p {
+      font-size: 14px;
+      color: var(--text-2);
+      line-height: 1.6;
+      max-width: 340px;
+      margin: 0 auto;
+    }
+
+    /* ─── Card ─── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 16px;
+    }
+
+    /* ─── Inputs ─── */
+    .inputs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 8px; }
+
+    .field label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-2);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .input-wrap { position: relative; }
+
+    .field input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 10px 10px;
+      font-family: var(--font-mono);
+      font-size: 24px;
+      font-weight: 500;
+      color: var(--text);
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    .field input::-webkit-outer-spin-button,
+    .field input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+    .field input:focus {
+      border-color: var(--border-hi);
+      background: #1e2130;
+    }
+
+    .field input.has-value { color: var(--accent); }
+
+    .field .unit {
+      font-size: 10px;
+      color: var(--text-3);
+      text-align: center;
+      font-family: var(--font-mono);
+      margin-top: 4px;
+      letter-spacing: 0.04em;
+    }
+
+    /* ─── Button ─── */
+    .btn-check {
+      width: 100%;
+      padding: 16px;
+      background: var(--green-dim);
+      border: 1px solid rgba(110,231,160,0.25);
+      border-radius: 12px;
+      color: var(--green);
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      letter-spacing: 0.01em;
+    }
+
+    .btn-check:hover {
+      background: rgba(110,231,160,0.18);
+      border-color: rgba(110,231,160,0.4);
+    }
+
+    .btn-check:active { transform: scale(0.99); }
+
+    .btn-check svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* ─── Error ─── */
+    .error {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: var(--red-dim);
+      border: 1px solid rgba(255,107,107,0.2);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--red);
+      display: none;
+    }
+
+    /* ─── Result ─── */
+    .result-card {
+      margin-top: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      display: none;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .result-card.show { display: block; }
+
+    .result-top {
+      padding: 24px 28px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 40px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .pill-low    { background: rgba(126,184,247,0.15); color: var(--blue); border: 1px solid rgba(126,184,247,0.25); }
+    .pill-normal { background: rgba(110,231,160,0.15); color: var(--green); border: 1px solid rgba(110,231,160,0.25); }
+    .pill-elevated { background: rgba(255,179,71,0.15); color: var(--amber); border: 1px solid rgba(255,179,71,0.25); }
+    .pill-high1  { background: rgba(255,140,0,0.15); color: #ff9a3c; border: 1px solid rgba(255,140,0,0.25); }
+    .pill-high2  { background: rgba(255,107,107,0.15); color: var(--red); border: 1px solid rgba(255,107,107,0.25); }
+    .pill-crisis { background: rgba(220,20,60,0.2); color: #ff4d6d; border: 1px solid rgba(220,20,60,0.3); }
+
+    .result-name {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .result-desc {
+      font-size: 13.5px;
+      color: var(--text-2);
+      line-height: 1.7;
+    }
+
+    /* ─── Scale bar ─── */
+    .scale-wrap {
+      padding: 20px 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .scale-track {
+      height: 6px;
+      border-radius: 4px;
+      display: flex;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .scale-seg { height: 100%; flex: 1; }
+
+    .scale-marker-wrap {
+      position: relative;
+      height: 16px;
+    }
+
+    .scale-arrow {
+      position: absolute;
+      transform: translateX(-50%);
+      top: 0;
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 7px solid var(--text);
+      transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .scale-xlabels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+
+    .scale-xlabels span {
+      font-size: 9px;
+      font-family: var(--font-mono);
+      color: var(--text-3);
+      letter-spacing: 0.03em;
+    }
+
+    /* ─── Stats row ─── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-item {
+      padding: 16px 20px;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+
+    .stat-item:last-child { border-right: none; }
+
+    .stat-val {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+
+    .stat-lbl {
+      font-size: 10px;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* ─── Tip ─── */
+    .result-tip {
+      padding: 16px 28px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .tip-icon {
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .tip-icon svg {
+      width: 16px;
+      height: 16px;
+      stroke: var(--text-3);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .result-tip p {
+      font-size: 12.5px;
+      color: var(--text-2);
+      line-height: 1.7;
+    }
+
+    /* ─── Reference table ─── */
+    .reference {
+      margin-top: 28px;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .ref-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 14px;
+      padding: 0 2px;
+    }
+
+    .ref-table {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .ref-row {
+      display: grid;
+      grid-template-columns: 12px 1fr 1fr;
+      gap: 12px;
+      padding: 12px 18px;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+
+    .ref-row:last-child { border-bottom: none; }
+    .ref-row:hover { background: var(--surface2); }
+    .ref-row.header-row { pointer-events: none; background: transparent; }
+
+    .ref-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .ref-cat {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .ref-range {
+      font-size: 12px;
+      color: var(--text-2);
+      font-family: var(--font-mono);
+    }
+
+    .ref-col-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-3);
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 12px;
+      color: var(--text-3);
+      line-height: 1.8;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    footer a { color: var(--text-2); text-decoration: none; }
+
+    /* ─── Animations ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse-ring {
+      0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(110,231,160,0.3); }
+      70%  { transform: scale(1);    box-shadow: 0 0 0 10px rgba(110,231,160,0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(110,231,160,0); }
+    }
+
+    .header-icon { animation: pulse-ring 3s infinite; }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 480px) {
+      .page-wrap { padding: 40px 16px 60px; }
+      .header h1 { font-size: 28px; }
+      .card { padding: 24px 20px; }
+      .result-top { padding: 20px; }
+      .scale-wrap, .result-tip { padding-left: 20px; padding-right: 20px; }
+      .stat-item { padding: 14px 10px; }
+      .stat-val { font-size: 17px; }
+      .inputs-grid { gap: 8px; }
+      .field input { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-wrap">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+      </div>
+      <h1>Blood Pressure<br><em>Analyzer</em></h1>
+      <p>Enter your three readings from your BP monitor to understand your cardiovascular health.</p>
+    </header>
+
+    <!-- Input card -->
+    <div class="card">
+      <div class="section-label">Your Readings</div>
+
+      <div class="inputs-grid">
+        <div class="field">
+          <label for="sys">Systolic</label>
+          <input type="number" id="sys" placeholder="120" min="60" max="250" inputmode="numeric">
+          <div class="unit">mmHg</div>
+        </div>
+        <div class="field">
+          <label for="dia">Diastolic</label>
+          <input type="number" id="dia" placeholder="80" min="40" max="150" inputmode="numeric">
+          <div class="unit">mmHg</div>
+        </div>
+        <div class="field">
+          <label for="pulse">Pulse</label>
+          <input type="number" id="pulse" placeholder="72" min="30" max="200" inputmode="numeric">
+          <div class="unit">bpm</div>
+        </div>
+      </div>
+
+      <button class="btn-check" onclick="checkBP()">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Analyze My Blood Pressure
+      </button>
+
+      <div class="error" id="error-msg">
+        Please enter valid values for all three readings before analyzing.
+      </div>
+
+      <!-- Result (inside card) -->
+      <div class="result-card" id="result-card">
+
+        <div class="result-top">
+          <div class="status-pill" id="status-pill">
+            <div class="pill-dot"></div>
+            <span id="pill-label">Normal</span>
+          </div>
+          <div class="result-name" id="result-name">Normal Blood Pressure</div>
+          <div class="result-desc" id="result-desc"></div>
+        </div>
+
+        <div class="scale-wrap">
+          <div class="scale-track">
+            <div class="scale-seg" style="background:#3a6ea5;"></div>
+            <div class="scale-seg" style="background:#2d7a4f;"></div>
+            <div class="scale-seg" style="background:#8a6b00;"></div>
+            <div class="scale-seg" style="background:#a05a00;"></div>
+            <div class="scale-seg" style="background:#8b2020;"></div>
+            <div class="scale-seg" style="background:#5a0000;"></div>
+          </div>
+          <div class="scale-marker-wrap">
+            <div class="scale-arrow" id="scale-arrow" style="left: 25%;"></div>
+          </div>
+          <div class="scale-xlabels">
+            <span>Low</span>
+            <span>Normal</span>
+            <span>Elevated</span>
+            <span>High 1</span>
+            <span>High 2</span>
+            <span>Crisis</span>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-item">
+            <div class="stat-val" id="disp-sys">—</div>
+            <div class="stat-lbl">Systolic</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-val" id="disp-dia">—</div>
+            <div class="stat-lbl">Diastolic</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-val" id="disp-pulse">—</div>
+            <div class="stat-lbl">Pulse</div>
+          </div>
+        </div>
+
+        <div class="result-tip">
+          <div class="tip-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <p id="tip-text"></p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Reference table -->
+    <div class="reference">
+      <div class="ref-title">BP Classification Reference</div>
+      <div class="ref-table">
+        <div class="ref-row header-row">
+          <div></div>
+          <div class="ref-col-label">Category</div>
+          <div class="ref-col-label">Systolic / Diastolic</div>
+        </div>
+        <div class="ref-row">
+          <div class="ref-dot" style="background:#3a6ea5;"></div>
+          <div class="ref-cat">Low (Hypotension)</div>
+          <div class="ref-range">Below 90 / 60</div>
+        </div>
+        <div class="ref-row">
+          <div class="ref-dot" style="background:#2d7a4f;"></div>
+          <div class="ref-cat">Normal</div>
+          <div class="ref-range">Below 120 / 80</div>
+        </div>
+        <div class="ref-row">
+          <div class="ref-dot" style="background:#8a6b00;"></div>
+          <div class="ref-cat">Elevated</div>
+          <div class="ref-range">120–129 / Below 80</div>
+        </div>
+        <div class="ref-row">
+          <div class="ref-dot" style="background:#a05a00;"></div>
+          <div class="ref-cat">High — Stage 1</div>
+          <div class="ref-range">130–139 / 80–89</div>
+        </div>
+        <div class="ref-row">
+          <div class="ref-dot" style="background:#8b2020;"></div>
+          <div class="ref-cat">High — Stage 2</div>
+          <div class="ref-range">140+ / 90+</div>
+        </div>
+        <div class="ref-row">
+          <div class="ref-dot" style="background:#5a0000;"></div>
+          <div class="ref-cat">Hypertensive Crisis</div>
+          <div class="ref-range">180+ / 120+</div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>Based on the American Heart Association (AHA) classification guidelines.</p>
+      <p style="margin-top:6px;">This tool is for informational purposes only.<br>Always consult a qualified healthcare professional for medical advice.</p>
+    </footer>
+
+  </div>
+
+  <script>
+    // Highlight input values as they're typed
+    ['sys','dia','pulse'].forEach(function(id) {
+      document.getElementById(id).addEventListener('input', function() {
+        this.classList.toggle('has-value', this.value.length > 0);
+      });
+    });
+
+    // Enter key support
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') checkBP();
+    });
+
+    function checkBP() {
+      var sys   = parseInt(document.getElementById('sys').value);
+      var dia   = parseInt(document.getElementById('dia').value);
+      var pulse = parseInt(document.getElementById('pulse').value);
+      var errEl = document.getElementById('error-msg');
+
+      if (!sys || !dia || !pulse || sys < 60 || sys > 250 || dia < 40 || dia > 150 || pulse < 30 || pulse > 200) {
+        errEl.style.display = 'block';
+        document.getElementById('result-card').classList.remove('show');
+        return;
+      }
+      errEl.style.display = 'none';
+
+      var cat, name, desc, tip, pillClass, pct;
+
+      if (sys < 90 || dia < 60) {
+        cat = 'low'; pillClass = 'pill-low'; pct = 8;
+        name = 'Low Blood Pressure';
+        desc = 'Your blood pressure is below the normal range — this is called hypotension. It can cause dizziness, light-headedness, and fatigue, especially when you stand up quickly (orthostatic hypotension).';
+        tip  = 'Stay well-hydrated, avoid prolonged standing, and rise slowly from seated or lying positions. Consult your doctor if symptoms occur frequently.';
+
+      } else if (sys < 120 && dia < 80) {
+        cat = 'normal'; pillClass = 'pill-normal'; pct = 25;
+        name = 'Normal Blood Pressure';
+        desc = 'Excellent — your blood pressure is within the ideal healthy range. Both your systolic and diastolic readings indicate good cardiovascular health at this moment.';
+        tip  = 'Maintain a balanced diet low in sodium, stay physically active, manage stress, and get regular check-ups to keep it in this range.';
+
+      } else if (sys >= 120 && sys <= 129 && dia < 80) {
+        cat = 'elevated'; pillClass = 'pill-elevated'; pct = 42;
+        name = 'Elevated Blood Pressure';
+        desc = 'Your systolic pressure is slightly above the normal threshold. This is a warning stage — you do not yet have hypertension, but you are at increased risk of developing it without lifestyle changes.';
+        tip  = 'Reduce sodium intake, increase aerobic exercise, limit alcohol, and manage stress. No medication is typically needed at this stage, but monitor regularly.';
+
+      } else if ((sys >= 130 && sys <= 139) || (dia >= 80 && dia <= 89)) {
+        cat = 'high1'; pillClass = 'pill-high1'; pct = 58;
+        name = 'High Blood Pressure — Stage 1';
+        desc = 'Your readings indicate Stage 1 hypertension. At this level, doctors typically recommend significant lifestyle changes and may consider prescribing medication depending on your overall cardiovascular risk.';
+        tip  = 'Speak with your doctor soon. Focus on reducing sodium, maintaining a healthy weight, exercising regularly, quitting smoking, and limiting alcohol intake.';
+
+      } else if (sys >= 180 || dia >= 120) {
+        cat = 'crisis'; pillClass = 'pill-crisis'; pct = 92;
+        name = 'Hypertensive Crisis';
+        desc = 'This is a critical blood pressure reading that requires immediate medical attention. Pressure at this level can cause serious damage to the heart, brain, kidneys, and blood vessels.';
+        tip  = 'Seek emergency medical care immediately — call your local emergency number. If you have symptoms such as chest pain, shortness of breath, back pain, difficulty speaking, or vision changes, do not wait.';
+
+      } else {
+        cat = 'high2'; pillClass = 'pill-high2'; pct = 75;
+        name = 'High Blood Pressure — Stage 2';
+        desc = 'Your readings indicate Stage 2 hypertension. This stage typically requires a combination of prescribed medication and meaningful lifestyle changes, managed under the supervision of a healthcare professional.';
+        tip  = 'Consult your doctor promptly. Untreated Stage 2 hypertension significantly increases the risk of heart attack, stroke, and kidney disease. Do not ignore these readings.';
+      }
+
+      // Pulse annotation
+      var pulseNote = '';
+      if      (pulse < 60)  pulseNote = ' Your resting pulse is also low (below 60 bpm, bradycardia range) — worth mentioning to your doctor.';
+      else if (pulse > 100) pulseNote = ' Your pulse is elevated above 100 bpm (tachycardia range) — this is worth discussing with your doctor too.';
+
+      // Update DOM
+      var pill = document.getElementById('status-pill');
+      pill.className = 'status-pill ' + pillClass;
+      document.getElementById('pill-label').textContent = cat.replace('high1','High Stage 1').replace('high2','High Stage 2').replace('crisis','Crisis').replace('normal','Normal').replace('elevated','Elevated').replace('low','Low');
+      document.getElementById('result-name').textContent = name;
+      document.getElementById('result-desc').textContent = desc;
+      document.getElementById('tip-text').textContent = tip + pulseNote;
+      document.getElementById('disp-sys').textContent   = sys;
+      document.getElementById('disp-dia').textContent   = dia;
+      document.getElementById('disp-pulse').textContent = pulse;
+      document.getElementById('scale-arrow').style.left = pct + '%';
+
+      // Show result
+      var rc = document.getElementById('result-card');
+      rc.classList.remove('show');
+      void rc.offsetWidth; // force reflow for re-animation
+      rc.classList.add('show');
+
+      // Smooth scroll to result
+      setTimeout(function() {
+        rc.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 100);
+    }
+  </script>
+
+</body>
+</html>
